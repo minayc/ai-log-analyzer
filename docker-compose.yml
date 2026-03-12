@@ -1,0 +1,72 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.2:1b
+      - LOG_PATH=/logs/app.log
+      - DATABASE_URL=sqlite:////data/app.db
+    volumes:
+      - ./logs:/logs
+      - ./data:/data
+    restart: unless-stopped
+
+  loggen:
+    image: alpine:3.20
+    command: >
+      sh -c '
+        mkdir -p /logs;
+        i=0;
+        while true; do
+          ts=$$(date "+%Y-%m-%d %H:%M:%S");
+          mod=$$((i % 12));
+
+          if [ $$mod -eq 0 ]; then
+            echo "[$$ts] INFO  auth-service - User login successful for user_id=1024" >> /logs/app.log;
+          elif [ $$mod -eq 1 ]; then
+            echo "[$$ts] INFO  api-gateway - Request completed path=/history status=200 latency_ms=42" >> /logs/app.log;
+          elif [ $$mod -eq 2 ]; then
+            echo "[$$ts] WARN  worker-service - High memory usage detected usage=78%" >> /logs/app.log;
+          elif [ $$mod -eq 3 ]; then
+            echo "[$$ts] INFO  db-service - Connection pool healthy active_connections=12" >> /logs/app.log;
+          elif [ $$mod -eq 4 ]; then
+            echo "[$$ts] ERROR payment-service - Database timeout while processing transaction_id=tx_4831" >> /logs/app.log;
+          elif [ $$mod -eq 5 ]; then
+            echo "[$$ts] INFO  payment-service - Retrying transaction_id=tx_4831 attempt=2" >> /logs/app.log;
+          elif [ $$mod -eq 6 ]; then
+            echo "[$$ts] INFO  payment-service - Transaction recovered transaction_id=tx_4831 status=success" >> /logs/app.log;
+          elif [ $$mod -eq 7 ]; then
+            echo "[$$ts] WARN  api-gateway - Upstream latency increased service=ollama latency_ms=1450" >> /logs/app.log;
+          elif [ $$mod -eq 8 ]; then
+            echo "[$$ts] ERROR ollama-client - Model response timeout model=llama3.2:1b timeout_s=60" >> /logs/app.log;
+          elif [ $$mod -eq 9 ]; then
+            echo "[$$ts] INFO  ollama-client - Fallback retry succeeded model=llama3.2:1b" >> /logs/app.log;
+          elif [ $$mod -eq 10 ]; then
+            echo "[$$ts] WARN  disk-monitor - Disk usage high partition=/data usage=86%" >> /logs/app.log;
+          else
+            echo "[$$ts] CRITICAL api-gateway - Repeated upstream failures detected count=3 service=payment-service" >> /logs/app.log;
+          fi
+
+          i=$$((i+1));
+          sleep 2;
+        done
+      '
+    volumes:
+      - ./logs:/logs
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

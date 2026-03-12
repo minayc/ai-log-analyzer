@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> />
+    <title>AI Log Analyst</title>
+    <style>
+        body { font-family: system-ui, -apple-system, san-serif; margin: 24px;}
+        .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px;}
+        .row { display: flex; gap: 16px; align-items: center; }
+        input { padding: 8px; border-radius: 8px; border: 1px solid #ccc; width: 120px; }
+        button { padding: 10px 14px; border-radius: 10px; border: 1x solid #333; background: #111; color: white; cursor: pointer; }
+        a { color: #0b57d0; text-decoratioon: none; }
+        small { color: #666; }
+        pre { background: #f6f8fa; padding: 12px; border-radius: 10px; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>AI Log Analyst</h1>
+    <p><small>Analyze your latest logs using Ollama + store summaries in SQLite.</small></p>
+
+    <div class="card">
+      <h2>Run analysis</h2>
+      <form method="get" action="/run">
+        <div class="row">
+          <label>Tail lines (n):</label>
+          <input type="number" name="n" value="30" min="1" max="500" />
+          <button type="submit">Analyze</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>History (latest first)</h2>
+      {% if history and history|length > 0 %}
+        <ul>
+          {% for item in history %}
+            <li>
+              <a href="/ui/history/{{ item.id }}">#{{ item.id }}</a>
+              — <small>{{ item.created_at }}</small>
+              — <small>n={{ item.n }}</small>
+              — <small>{{ item.model }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No history yet. Run the first analysis.</p>
+      {% endif %}
+    </div>
+  </body>
+</html>

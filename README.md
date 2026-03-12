@@ -59,25 +59,6 @@ HTTPX
 
 ---
 
-# Project Structure
-ai-log-analyzer
-│
-├── backend
-│ ├── main.py
-│ ├── requirements.txt
-│ ├── Dockerfile
-│ └── templates
-│ ├── index.html
-│ └── detail.html
-│
-├── logs
-├── data
-├── docker-compose.yml
-└── README.md
-
-
----
-
 # How It Works
 
 1. The **log generator container** continuously produces simulated service logs.
@@ -97,16 +78,14 @@ ai-log-analyzer
 
 ---
 
-# Running the Project
+## Learning Purpose
 
-## Requirements
+This project was developed as a learning exercise to explore:
 
-Docker  
-Docker Compose  
-
----
-
-## Start the system
+- LLM-assisted log analysis
+- backend development with FastAPI
+- containerized system architecture using Docker
+- integrating AI models into operational tools
 
 Run:
 
@@ -114,18 +93,5 @@ Run:
 docker compose up --build
 
 
-The application will be available at:
 
-http://localhost:8000
 
-# Learning Purpose
-
-* This project was developed as a learning exercise to explore:
-
-* LLM-assisted log analysis
-
-* backend development with FastAPI
-
-* containerized system architecture using Docker
-
-* integrating AI models into operational tools
